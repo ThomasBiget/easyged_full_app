@@ -1,0 +1,28 @@
+# Environment
+.env
+*.env
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build
+build/
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (fichiers uploadés)
+api/uploads/*
+!api/uploads/.gitkeep
+
+# Logs
+*.log
+

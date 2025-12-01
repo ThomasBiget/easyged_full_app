@@ -1,0 +1,17 @@
+{
+    "name": "thomas/easyged-api",
+    "description": "application de gestion de facture avec OCR",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Thomas Biget"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    }
+}
