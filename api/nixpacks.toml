@@ -1,8 +1,8 @@
 [phases.setup]
-nixPkgs = ["php83", "php83Extensions.pdo_pgsql", "php83Extensions.curl"]
+nixPkgs = ["php83", "php83Extensions.pdo_pgsql", "php83Extensions.curl", "bash"]
 
 [phases.install]
-cmds = ["composer install --no-dev --optimize-autoloader"]
+cmds = ["composer install --no-dev --optimize-autoloader", "chmod +x start.sh"]
 
 [start]
-cmd = "php -S 0.0.0.0:${PORT:-8080} -t public"
+cmd = "bash start.sh"
