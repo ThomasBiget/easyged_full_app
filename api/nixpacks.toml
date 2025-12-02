@@ -5,5 +5,4 @@ nixPkgs = ["php83", "php83Extensions.pdo_pgsql", "php83Extensions.curl"]
 cmds = ["composer install --no-dev --optimize-autoloader"]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t public"
-
+cmd = "php -S 0.0.0.0:${PORT:-8080} -t public"
