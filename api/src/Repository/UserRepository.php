@@ -44,7 +44,7 @@ class UserRepository implements UserRepositoryInterface
     }
 
 
-    public function create(array $data): bool
+    public function create(array $data): int
     {
         $stmt = $this->db->prepare("
             INSERT INTO users (email, password_hash, name)

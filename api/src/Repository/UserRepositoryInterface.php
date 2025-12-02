@@ -8,5 +8,5 @@ interface UserRepositoryInterface
 
     public function findById(int $id): ?array;
 
-    public function create(array $data): bool;
+    public function create(array $data): int;
 }

@@ -16,17 +16,24 @@ class AuthController
 
     public function register(): void
     {
-        $data = json_decode(file_get_contents('php://input'), true);
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
 
-        if (!isset($data['email'], $data['password'], $data['name'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Email, mot de passe et nom requis']);
-            return;
+            if (!isset($data['email'], $data['password'], $data['name'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Email, mot de passe et nom requis']);
+                return;
+            }
+
+            $userId = $this->authService->register($data['email'], $data['password'], $data['name']);
+
+            http_response_code(201);
+            echo json_encode(['user_id' => $userId]);
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
         }
-
-        $userId = $this->authService->register($data['email'], $data['password'], $data['name']);
-
-        echo json_encode(['user_id' => $userId]);
     }
 
     public function login(): void
