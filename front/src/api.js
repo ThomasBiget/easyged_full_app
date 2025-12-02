@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// URL de l'API - utilise la variable d'environnement ou l'URL de production
+const API_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname === 'localhost' 
+    ? 'http://localhost:8000' 
+    : 'https://easygedfullapp-production.up.railway.app');
 
 const api = axios.create({
   baseURL: API_URL,
