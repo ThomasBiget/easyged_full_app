@@ -1,12 +1,11 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x"]
+nixPkgs = ["nodejs-18_x", "bash"]
 
 [phases.install]
 cmds = ["npm install"]
 
 [phases.build]
-cmds = ["npm run build"]
+cmds = ["npm run build", "chmod +x start.sh"]
 
 [start]
-cmd = "npx serve -s build -l $PORT"
-
+cmd = "bash start.sh"
