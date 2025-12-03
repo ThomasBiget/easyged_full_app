@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { getInvoices, deleteInvoice } from '../api';
+import { getInvoices, deleteInvoice, searchInvoices } from '../api';
 import UploadModal from '../components/UploadModal';
 
 function Dashboard({ onLogout }) {
   const [invoices, setInvoices] = useState([]);
+  const [allInvoices, setAllInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const fetchInvoices = async () => {
     try {
       const response = await getInvoices();
-      setInvoices(response.data || []);
+      const data = response.data || [];
+      setInvoices(data);
+      setAllInvoices(data);
     } catch (err) {
       console.error('Erreur:', err);
     } finally {
@@ -22,6 +27,47 @@ function Dashboard({ onLogout }) {
   useEffect(() => {
     fetchInvoices();
   }, []);
+
+  // Recherche Solr
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    
+    if (!searchQuery.trim()) {
+      setInvoices(allInvoices);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await searchInvoices(searchQuery);
+      const results = response.data || [];
+      
+      // Solr retourne les IDs, on filtre nos factures locales
+      if (results.length > 0) {
+        const resultIds = results.map(r => String(r.id));
+        const filtered = allInvoices.filter(inv => resultIds.includes(String(inv.id)));
+        setInvoices(filtered.length > 0 ? filtered : results);
+      } else {
+        setInvoices([]);
+      }
+    } catch (err) {
+      console.error('Erreur recherche:', err);
+      // Fallback: recherche locale
+      const query = searchQuery.toLowerCase();
+      const filtered = allInvoices.filter(inv => 
+        inv.supplier_name?.toLowerCase().includes(query) ||
+        inv.invoice_number?.toLowerCase().includes(query)
+      );
+      setInvoices(filtered);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setInvoices(allInvoices);
+  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Supprimer cette facture ?')) {
@@ -75,6 +121,54 @@ function Dashboard({ onLogout }) {
           <button className="btn btn-primary" onClick={() => setShowUpload(true)}>
             + Nouvelle Facture
           </button>
+        </div>
+
+        {/* Barre de recherche Solr */}
+        <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem' }}>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.2rem' }}>
+                🔍
+              </span>
+              <input
+                type="text"
+                placeholder="Rechercher une facture (fournisseur, numéro, contenu...)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 0.75rem 0.75rem 2.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  backgroundColor: 'var(--bg-secondary)'
+                }}
+              />
+            </div>
+            <button 
+              type="submit" 
+              className="btn btn-primary"
+              disabled={isSearching}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {isSearching ? '...' : 'Rechercher'}
+            </button>
+            {searchQuery && (
+              <button 
+                type="button" 
+                className="btn btn-secondary"
+                onClick={clearSearch}
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                Effacer
+              </button>
+            )}
+          </form>
+          {searchQuery && !isSearching && (
+            <p style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              {invoices.length} résultat(s) pour "{searchQuery}"
+            </p>
+          )}
         </div>
 
         <div className="stats-grid">

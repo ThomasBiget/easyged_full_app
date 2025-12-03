@@ -53,6 +53,10 @@ export const register = (email, password, name) =>
 export const getInvoices = () => 
   api.get('/invoices');
 
+// Search (Solr)
+export const searchInvoices = (query) => 
+  api.get(`/search?q=${encodeURIComponent(query)}`);
+
 export const getInvoice = (id) => 
   api.get(`/invoices/show?id=${id}`);
 
