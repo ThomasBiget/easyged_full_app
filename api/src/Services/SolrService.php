@@ -76,8 +76,25 @@ class SolrService
 
         if ($error) {
             error_log("Solr cURL error: " . $error);
+        } elseif ($httpCode >= 400) {
+            error_log("Solr error (HTTP $httpCode): " . $response);
+            // On ne propage pas l'erreur pour ne pas bloquer l'application
         } else {
-            error_log("Solr response (HTTP $httpCode): " . $response);
+            error_log("Solr indexed successfully (HTTP $httpCode)");
         }
+    }
+    
+    public function isAvailable(): bool
+    {
+        $ch = curl_init($this->endpoint . "/admin/ping");
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 2
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        return $httpCode === 200;
     }
 }
