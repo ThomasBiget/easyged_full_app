@@ -11,20 +11,29 @@ function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('📤 Form submitted!');
+    console.log('📧 Email:', email);
+    console.log('🔐 Password:', password ? '***' : 'empty');
+    
     setError('');
     setLoading(true);
 
     try {
       if (isRegister) {
+        console.log('📝 Registering...');
         await register(email, password, name);
-        // Après inscription, on se connecte
+        console.log('✅ Registration done, logging in...');
         const response = await login(email, password);
+        console.log('✅ Login response:', response.data);
         onLogin(response.data.token, response.data.user);
       } else {
+        console.log('🔑 Logging in...');
         const response = await login(email, password);
+        console.log('✅ Login response:', response.data);
         onLogin(response.data.token, response.data.user);
       }
     } catch (err) {
+      console.error('❌ Error:', err);
       setError(err.response?.data?.error || 'Une erreur est survenue');
     } finally {
       setLoading(false);
