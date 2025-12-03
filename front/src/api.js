@@ -1,10 +1,12 @@
 import axios from 'axios';
 
-// URL de l'API - utilise la variable d'environnement ou l'URL de production
-const API_URL = process.env.REACT_APP_API_URL || 
-  (window.location.hostname === 'localhost' 
-    ? 'http://localhost:8000' 
-    : 'https://easygedfullapp-production.up.railway.app');
+// URL de l'API - hardcodée pour la production
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:8000' 
+  : 'https://easygedfullapp-production.up.railway.app';
+
+console.log('🔌 API URL:', API_URL);
+console.log('🌐 Hostname:', window.location.hostname);
 
 const api = axios.create({
   baseURL: API_URL,
