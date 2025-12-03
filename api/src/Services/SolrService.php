@@ -8,7 +8,7 @@ class SolrService
 
     public function __construct()
     {
-        $this->endpoint = $_ENV['SOLR_URL'] ?? getenv('SOLR_URL') ?: 'http://localhost:8983/solr/invoices';
+        $this->endpoint = $_ENV['SOLR_URL'] ?? getenv('SOLR_URL') ?: 'http://Solr.railway.internal:8983/solr/invoices';
         error_log("SolrService initialized with endpoint: " . $this->endpoint);
     }
 
