@@ -41,15 +41,40 @@ class SolrService
 
     public function search(string $query): array
     {
-        $url = $this->endpoint . "/select?q=" . urlencode($query) . "&wt=json";
+        // Utilise edismax pour chercher dans tous les champs
+        // qf = query fields avec boost
+        $params = http_build_query([
+            'q' => $query,
+            'defType' => 'edismax',
+            'qf' => 'supplier_name^3 invoice_number^2 line_items_text^2 status',
+            'q.op' => 'OR',
+            'wt' => 'json',
+            'rows' => 100
+        ]);
         
-        $result = @file_get_contents($url);
-        if ($result === false) {
-            error_log("Solr search failed for URL: " . $url);
+        $url = $this->endpoint . "/select?" . $params;
+        error_log("Solr search URL: " . $url);
+        
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 5
+        ]);
+        
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+        
+        if ($error || $httpCode >= 400) {
+            error_log("Solr search error: " . ($error ?: "HTTP $httpCode - $result"));
             return ['response' => ['docs' => []]];
         }
         
-        return json_decode($result, true) ?? ['response' => ['docs' => []]];
+        $decoded = json_decode($result, true);
+        error_log("Solr found " . ($decoded['response']['numFound'] ?? 0) . " documents");
+        
+        return $decoded ?? ['response' => ['docs' => []]];
     }
 
     private function sendToSolr(array $payload): void
