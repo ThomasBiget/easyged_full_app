@@ -41,18 +41,15 @@ class SolrService
 
     public function search(string $query): array
     {
-        // Utilise edismax pour chercher dans tous les champs
-        // qf = query fields avec boost
-        $params = http_build_query([
-            'q' => $query,
-            'defType' => 'edismax',
-            'qf' => 'supplier_name^3 invoice_number^2 line_items_text^2 status',
-            'q.op' => 'OR',
-            'wt' => 'json',
-            'rows' => 100
-        ]);
+        // Construit l'URL manuellement pour éviter les problèmes d'encodage
+        $url = $this->endpoint . "/select?" 
+            . "q=" . urlencode($query)
+            . "&defType=edismax"
+            . "&qf=" . urlencode("supplier_name^3 invoice_number^2 line_items_text^2 status")
+            . "&q.op=OR"
+            . "&wt=json"
+            . "&rows=100";
         
-        $url = $this->endpoint . "/select?" . $params;
         error_log("Solr search URL: " . $url);
         
         $ch = curl_init($url);
